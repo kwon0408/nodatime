@@ -17,6 +17,7 @@ namespace NodaTime.Calendars
         {
             private const int AverageDaysPer10Years = 3652; // Ideally 413811/1133 ~= 365.234775 per year
 
+            #region private static readonly byte[] _yearInfo = Convert.FromBase64String(/* a big chunk of string */);
             private static readonly byte[] _yearInfo = Convert.FromBase64String(
                 "AhNVsAIJRdBhHaLYAhCisAIFqVBBGbSoAg1tIMIBrWACFKtgAgpVsIEfRbgCEkVwAgdSsFEbaVACDulQAgNqoBEXrVACC6tQsgFT" +
                 "YAISysACB+VgcRzSqAIQ0qACBNlQMRlaqAINVqDCAqbQAhSV0AIKStBxHqTYAhKk0AIGsmBRGrVQAg6zcAEFqtARF5XQAguVsJIB" +
@@ -80,6 +81,7 @@ namespace NodaTime.Calendars
                 "CktgYR2lcAIRpXACB1JwURtpMAIN2TACA1qgMRerUAILltCxH0roAhNK4AIIpNBhHNJoAg/SUAIE1SBRGNqgAgy2oAIBltAhFkrY" +
                 "AgpJsHEepLgCEaSwAgayUFEatSgCDm1AAgKtoDEXlbA="
                 );
+            #endregion
             protected override byte[] YearInfo => _yearInfo;
 
             public Korean()

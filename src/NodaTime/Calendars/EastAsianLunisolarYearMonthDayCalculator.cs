@@ -3,6 +3,7 @@
 // as found in the LICENSE.txt file.
 
 using NodaTime.Annotations;
+using NodaTime.Text;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -46,12 +47,7 @@ namespace NodaTime.Calendars
             => (year - MinYear) * BytesPerYear;
 
         private int GetLeapMonth([Trusted] int year)
-            => YearInfo[GetStartByte(year)] >> 4;
-
-        private int GetMonthPatterns([Trusted] int year)
-            => BitConverter.ToInt16(YearInfo, GetStartByte(year));
-
-
+            => YearInfo[GetStartByte(year)] >> 4;        
 
         protected override int CalculateStartOfYearDays([Trusted] int year)
         {
@@ -62,12 +58,18 @@ namespace NodaTime.Calendars
 
         protected override int GetDaysFromStartOfYearToStartOfMonth([Trusted] int year, [Trusted] int month)
         {
+            int d = 0;
+            for (int m = 1; m < month; m++)
+                d += GetDaysInMonth(year, m);
 
+            return d;
         }
 
         internal override YearMonthDay AddMonths([Trusted] YearMonthDay yearMonthDay, int months)
         {
-
+            // TODO: 1. convert leap month to normal month
+            // TODO: 2. add months -> adjust year
+            // TODO: 3. if day 30 is out of target month, set day to 29
         }
 
         internal override int GetDaysInMonth([Trusted] int year, int month)
@@ -75,8 +77,10 @@ namespace NodaTime.Calendars
             if (month < 1 || month > GetMonthsInYear(year))
                 throw new ArgumentOutOfRangeException(nameof(month));
 
+            ushort monthPattern  = BitConverter.ToUInt16(YearInfo, GetStartByte(year));
+
             int mask = 0x10000 >> month;
-            return (mask & GetMonthPatterns(year)) == 0 ? 29 : 30;
+            return (mask & monthPattern) == 0 ? 29 : 30;
         }
 
         internal override int GetDaysInYear([Trusted] int year)
@@ -95,7 +99,18 @@ namespace NodaTime.Calendars
 
         internal override YearMonthDay GetYearMonthDay([Trusted] int year, [Trusted] int dayOfYear)
         {
+            int m = 1;
+            int d = dayOfYear;
+            for (; m <= GetMonthsInYear(year); m++)
+            {
+                int days = GetDaysInMonth(year, m);
+                if (0 < d && d < days)
+                    d -= days;
+                else
+                    break;
+            }
 
+            return new YearMonthDay(year, m, d);
         }
 
         internal override bool IsLeapYear([Trusted] int year)
@@ -110,7 +125,9 @@ namespace NodaTime.Calendars
 
         internal override YearMonthDay SetYear(YearMonthDay yearMonthDay, [Trusted] int year)
         {
-
+            // TODO: 1. convert leap month to normal month
+            // TODO: 2. add months -> adjust year
+            // TODO: 3. if day 30 is out of target month, set day to 29
         }
     }
 }
