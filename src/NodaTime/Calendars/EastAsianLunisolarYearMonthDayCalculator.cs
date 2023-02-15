@@ -125,9 +125,19 @@ namespace NodaTime.Calendars
 
         internal override YearMonthDay SetYear(YearMonthDay yearMonthDay, [Trusted] int year)
         {
-            // TODO: 1. convert leap month to normal month
-            // TODO: 2. add months -> adjust year
+            // 1. change year: nothing to do, just call the same variable in YearMonthDay()
+
+            // TODO: 2. if leap month is invalid, convert leap month to normal month
+            int targetLeapMonth = GetLeapMonth(year);
+
             // TODO: 3. if day 30 is out of target month, set day to 29
+
+            return new YearMonthDay(year, month, day);
         }
+
+        // TODO: Month number or name?
+        // E.g. If Leap month is 6,
+        // month names   1 - 2 - 3 - 4 - 5 - 6 - 6-leap - 7 - 8 -  9 - 10 - 11 - 12 corresponds to
+        // month numbers 1 - 2 - 3 - 4 - 5 - 6 - 7      - 8 - 9 - 10 - 11 - 12 - 13.        
     }
 }
