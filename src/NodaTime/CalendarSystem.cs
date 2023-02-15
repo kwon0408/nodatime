@@ -85,6 +85,9 @@ namespace NodaTime
         private const string UmAlQuraName = "Um Al Qura";
         private const string UmAlQuraId = UmAlQuraName;
 
+        private const string KoreanLunisolarName = "Korean Lunisolar";
+        private const string KoreanLunisolarId = KoreanLunisolarName;
+
         // While we could implement some of these as auto-props, it probably adds more confusion than convenience.
         private static readonly CalendarSystem[] CalendarByOrdinal = new CalendarSystem[(int) CalendarOrdinal.Size];
 
@@ -171,6 +174,7 @@ namespace NodaTime
             {GetIslamicId(IslamicLeapYearPattern.Base15, IslamicEpoch.Astronomical), () => GetIslamicCalendar(IslamicLeapYearPattern.Base15, IslamicEpoch.Astronomical)},
             {GetIslamicId(IslamicLeapYearPattern.Base16, IslamicEpoch.Astronomical), () => GetIslamicCalendar(IslamicLeapYearPattern.Base16, IslamicEpoch.Astronomical)},
             {GetIslamicId(IslamicLeapYearPattern.HabashAlHasib, IslamicEpoch.Astronomical), () => GetIslamicCalendar(IslamicLeapYearPattern.HabashAlHasib, IslamicEpoch.Astronomical)},
+            {KoreanLunisolarId, () => KoreanLunisolar},
         };
 
         /// <summary>
@@ -731,6 +735,17 @@ namespace NodaTime
         /// <value>A calendar system for the Um Al Qura calendar.</value>
         public static CalendarSystem UmAlQura => MiscellaneousCalendars.UmAlQura;
 
+
+        /// <summary>
+        /// Returns the Korean lunisolar calendar.
+        /// </summary>
+        /// <remarks>
+        /// <para>This implementation uses data derived from the .NET 7.0 implementation (with the data built into Noda Time, so there's
+        /// no BCL dependency) for simplicity.</para>
+        /// </remarks>
+        /// <returns>The Korean lunisolar system.</returns>
+        public static CalendarSystem KoreanLunisolar => EastAsianLunisolarCalendars.Korean;
+
         // TODO: Move this after fixing https://github.com/nodatime/nodatime/issues/1269
         [VisibleForTesting]
         internal static CalendarSystem ForOrdinalUncached([Trusted] CalendarOrdinal ordinal) => ordinal switch
@@ -755,6 +770,7 @@ namespace NodaTime
             CalendarOrdinal.IslamicCivilIndian => GetIslamicCalendar(IslamicLeapYearPattern.Indian, IslamicEpoch.Civil),
             CalendarOrdinal.IslamicCivilHabashAlHasib => GetIslamicCalendar(IslamicLeapYearPattern.HabashAlHasib, IslamicEpoch.Civil),
             CalendarOrdinal.UmAlQura => UmAlQura,
+            CalendarOrdinal.KoreanLunisolar => KoreanLunisolar,
             _ => throw new InvalidOperationException($"Bug in Noda Time: calendar ordinal {ordinal} missing from switch in CalendarSystem.ForOrdinal.")
         };
 
@@ -843,6 +859,19 @@ namespace NodaTime
 
             // Static constructor to enforce laziness.
             static HebrewCalendars() { }
+        }
+
+        private static class EastAsianLunisolarCalendars
+        {
+            internal static readonly CalendarSystem Korean =
+                new CalendarSystem(CalendarOrdinal.KoreanLunisolar, KoreanLunisolarId, KoreanLunisolarName, new EastAsianLunisolarYearMonthDayCalculator.Korean(), Era.Common);
+
+            // TODO: internal static readonly CalendarSystem Japanese = ...
+            // TODO: internal static readonly CalendarSystem Chinese = ...
+            // TODO: internal static readonly CalendarSystem Taiwanese = ...
+
+            // Static constructor to enforce laziness.
+            static EastAsianLunisolarCalendars() { }
         }
     }
 }

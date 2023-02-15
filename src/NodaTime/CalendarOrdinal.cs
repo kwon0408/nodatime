@@ -29,7 +29,8 @@ namespace NodaTime
         IslamicCivilHabashAlHasib = 16,
         UmAlQura = 17,
         Badi = 18,
+        KoreanLunisolar = 19,
         // Not a real ordinal; just present to keep a count. Increase this as the number increases...
-        Size = 19
+        Size = 20
     }
 }
