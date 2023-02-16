@@ -968,6 +968,9 @@ namespace NodaTime
         /// </remarks>
         /// </summary>        
         /// <returns>The month number.</returns>
+        /// <exception cref="ArgumentException">
+        /// The leap month given for the year is invalid. - OR - A leap month is given for non-leap year.
+        /// </exception>
         public int GetMonthNumberFromMonthName(int year, int monthName)
             => GetMonthNumberFromMonthName(year, monthName.ToString());
 
@@ -987,6 +990,9 @@ namespace NodaTime
         /// </remarks>
         /// </summary>        
         /// <returns>The month number.</returns>
+        /// <exception cref="ArgumentException">
+        /// The leap month given for the year is invalid. - OR - A leap month is given for non-leap year.
+        /// </exception>
         public int GetMonthNumberFromMonthName(int year, string monthName)
         {
             // if the CalendarSystem is not an EALC, just return the month number itself in string
@@ -995,7 +1001,11 @@ namespace NodaTime
 
             int leap = calc.GetLeapMonth(year);
             if (leap == 0)
+            {
+                if (monthName.StartsWith(calc.LeapMonthPrefix))
+                    throw new ArgumentException("A leap month is given for non-leap year.");
                 return int.Parse(monthName);
+            }
             else
             {
                 string monthNamePartial = monthName.Replace(calc.LeapMonthPrefix, "");
@@ -1006,7 +1016,7 @@ namespace NodaTime
                     if (leap == value)
                         return value + 1;
                     else
-                        throw new ArgumentException("invalid leap month for the given year");
+                        throw new ArgumentException("The leap month given for the year is invalid.");
                 }
                 else
                 {
