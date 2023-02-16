@@ -86,10 +86,18 @@ namespace NodaTime.Test.Calendars
         public void LeapMonthNames()
         {
             var calendar = CalendarSystem.KoreanLunisolar;
+            
             Assert.AreEqual(calendar.GetMonthName(new YearMonth(2023, 2)), "2");
-            Assert.AreEqual(calendar.GetMonthName(2023, 3), "윤2");
-            Assert.AreEqual(calendar.GetMonthName(new LocalDate(2023, 4, 1, calendar)), "3");
+            Assert.AreEqual(calendar.GetMonthNumberFromMonthName(2023, 2), 2);
 
+            Assert.AreEqual(calendar.GetMonthName(2023, 3), "윤2");
+            Assert.AreEqual(calendar.GetMonthNumberFromMonthName(2023, "윤2"), 3);
+            Assert.Throws<ArgumentException>(() => calendar.GetMonthNumberFromMonthName(2023, "윤11"));
+
+            Assert.AreEqual(calendar.GetMonthName(new LocalDate(2023, 4, 1, calendar)), "3");
+            Assert.AreEqual(calendar.GetMonthNumberFromMonthName(2023, 3), 4);
+            
+            Assert.Throws<ArgumentException>(() => calendar.GetMonthNumberFromMonthName(2024, "윤5"));
         }
     }
 }
