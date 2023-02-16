@@ -16,9 +16,9 @@ namespace NodaTime.Calendars
         internal sealed class Korean: EastAsianLunisolarYearMonthDayCalculator
         {            
             private const int _MinYear = 918;
-            private const int _MaxYear = 2050;
-            private const int AverageDaysPer10Years = 3652; // Ideally 413811/1133 ~= 365.234775 per year
+            private const int _MaxYear = 2050;            
             private const int DaysAtStartOfMinYear = -384186; // 0918-02-19 (CE, Gregorian)
+            private const int ComputedDaysAtStartOfYear1 = DaysAtStartOfMinYear + (int)(((1 - _MinYear) / 10.0) * AverageDaysPer10Years);
 
             #region private static readonly byte[] _yearInfo = Convert.FromBase64String(/* a big chunk of string */);
             private static readonly byte[] _yearInfo = Convert.FromBase64String(
@@ -91,8 +91,7 @@ namespace NodaTime.Calendars
             public override string LeapMonthPrefix => "윤";
 
             public Korean()
-                : base(_MinYear, _MaxYear, AverageDaysPer10Years, DaysAtStartOfMinYear)
-                // daysAtStartOfYear1 == 0 because 1 CE is out of range
+                : base(_MinYear, _MaxYear, AverageDaysPer10Years, ComputedDaysAtStartOfYear1)
             {
             }
         }

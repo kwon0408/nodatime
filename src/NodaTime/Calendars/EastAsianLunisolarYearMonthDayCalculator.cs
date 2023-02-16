@@ -10,6 +10,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace NodaTime.Calendars
 {
@@ -42,11 +43,15 @@ namespace NodaTime.Calendars
 
         private static readonly GregorianYearMonthDayCalculator gregorian = new GregorianYearMonthDayCalculator();
 
+        // Ideally 413811/1133 ~= 365.234775 per year.
+        // TODO: This value is derived from KoreanLunisolar. Maybe different in other subclasses.
+        private const int AverageDaysPer10Years = 3652; 
+
         protected EastAsianLunisolarYearMonthDayCalculator
             (int minYear, int maxYear, int averageDaysPer10Years, int daysAtStartOfYear1)
             : base(minYear, maxYear, averageDaysPer10Years, daysAtStartOfYear1)
         {
-        }
+        }       
 
         private int GetStartByte([Trusted] int year)
             => (year - MinYear) * BytesPerYear;
@@ -64,13 +69,22 @@ namespace NodaTime.Calendars
 
         protected override int CalculateStartOfYearDays([Trusted] int year)
         {
-            if (year == MaxYear + 1)
-                return CalculateStartOfYearDays(MaxYear) + GetDaysInYear(MaxYear);
-
-            int month = YearInfo[GetStartByte(year)] & 0x0F;
-            int day = YearInfo[GetStartByte(year) + 1];
-            return gregorian.GetDaysSinceEpoch(new YearMonthDay(year, month, day));
-
+            if (year < MinYear) // ... - 917
+            {
+                int diff = year - MinYear;
+                return CalculateStartOfYearDays(MinYear) + (int)(AverageDaysPer10Years * diff / 10.0);
+            }
+            else if (year > MaxYear) // 2051 - 9999
+            {
+                int diff = year - MaxYear;
+                return CalculateStartOfYearDays(MaxYear) + (int)(AverageDaysPer10Years * diff / 10.0);
+            }
+            else
+            {
+                int month = YearInfo[GetStartByte(year)] & 0x0F;
+                int day = YearInfo[GetStartByte(year) + 1];
+                return gregorian.GetDaysSinceEpoch(new YearMonthDay(year, month, day));
+            }
         }
 
         // Q: What are month numbers and names?
@@ -149,10 +163,10 @@ namespace NodaTime.Calendars
             for (; m <= GetMonthsInYear(year); m++)
             {
                 int days = GetDaysInMonth(year, m);
-                if (0 < d && d < days)
-                    d -= days;
-                else
+                if (0 < d && d <= days)
                     break;
+                else
+                    d -= days;
             }
 
             return new YearMonthDay(year, m, d);

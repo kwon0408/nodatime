@@ -62,7 +62,7 @@ namespace NodaTime.Test.Calendars
         {
             var nodaCalendar = CalendarSystem.KoreanLunisolar;
             var bclCalendar = new KoreanLunisolarCalendar();
-            LocalDate nodaDate;
+            LocalDate nodaDate, nodaDate2;
             DateTime bclDate;
 
             for (int year = 918; year < 2051; ++year)
@@ -73,11 +73,13 @@ namespace NodaTime.Test.Calendars
 
                 for (int month = 1; month <= nodaMaxMonth; ++month)
                 {
-                    nodaDate = new LocalDate(year, 1, 1, nodaCalendar);
-                    bclDate = bclCalendar.ToDateTime(year, 1, 1, 0, 0, 0, 0, KoreanLunisolarCalendar.GregorianEra);
+                    nodaDate = new LocalDate(year, month, 1, nodaCalendar); // 0918-01-01 KLC
+                    bclDate = bclCalendar.ToDateTime(year, month, 1, 0, 0, 0, 0, KoreanLunisolarCalendar.GregorianEra); // 0918-02-19 ISO
+                    nodaDate2 = LocalDate.FromDateTime(bclDate).WithCalendar(nodaCalendar); // FIXME: 0918-02-19 ISO -> 0918-01-18 KLC ????
 
                     
-                    Assert.AreEqual(nodaDate.ToDateTimeUnspecified(), bclDate);
+                    Assert.AreEqual(nodaDate.ToDateTimeUnspecified(), bclDate); // SUCCESS
+                    Assert.AreEqual(nodaDate, nodaDate2); // FAIL
                 }
             }
         }
