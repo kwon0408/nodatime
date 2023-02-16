@@ -14,8 +14,11 @@ namespace NodaTime.Calendars
     internal abstract partial class EastAsianLunisolarYearMonthDayCalculator
     {
         internal sealed class Korean: EastAsianLunisolarYearMonthDayCalculator
-        {
+        {            
+            private const int _MinYear = 918;
+            private const int _MaxYear = 2050;
             private const int AverageDaysPer10Years = 3652; // Ideally 413811/1133 ~= 365.234775 per year
+            private const int DaysAtStartOfMinYear = -384186; // 0918-02-19 (CE, Gregorian)
 
             #region private static readonly byte[] _yearInfo = Convert.FromBase64String(/* a big chunk of string */);
             private static readonly byte[] _yearInfo = Convert.FromBase64String(
@@ -80,16 +83,18 @@ namespace NodaTime.Calendars
                 "VsBxHarYAhIl0AIHktBRGslYAg6pUAIDtKAxF7pQAgq1UJEfVagCE0ugAgilsFEcUrgCEFKwAgWpUEEZtKgCDGqgAgGtUCEWVagC" +
                 "CktgYR2lcAIRpXACB1JwURtpMAIN2TACA1qgMRerUAILltCxH0roAhNK4AIIpNBhHNJoAg/SUAIE1SBRGNqgAgy2oAIBltAhFkrY" +
                 "AgpJsHEepLgCEaSwAgayUFEatSgCDm1AAgKtoDEXlbA="
+                // a row (0x020B0000) for 2051 CE was added to prevent IndexOutOfRangeException
                 );
             #endregion
             protected override byte[] YearInfo => _yearInfo;
 
+            public override string LeapMonthPrefix => "윤";
+
             public Korean()
-                : base(918, 2050, AverageDaysPer10Years, 0)
+                : base(_MinYear, _MaxYear, AverageDaysPer10Years, DaysAtStartOfMinYear)
                 // daysAtStartOfYear1 == 0 because 1 CE is out of range
             {
             }
-
         }
     }
 }

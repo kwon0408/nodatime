@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using static System.FormattableString;
 
 // Remove static constructors.
@@ -357,6 +358,7 @@ namespace NodaTime
         ///   <item><term>Um Al Qura</term><description><see cref="CalendarSystem.UmAlQura"/>()</description></item>
         ///   <item><term>Hebrew Civil</term><description><see cref="CalendarSystem.HebrewCivil"/></description></item>
         ///   <item><term>Hebrew Scriptural</term><description><see cref="CalendarSystem.HebrewScriptural"/></description></item>
+        ///   <item><term>Korean Lunisolar</term><description><see cref="CalendarSystem.KoreanLunisolar"/></description></item>
         /// </list>
         /// <para>
         /// The ID "Persian Algorithmic" for the Persian Astronomical calendar is an unfortunate error. The ID has been incorrect
@@ -735,7 +737,6 @@ namespace NodaTime
         /// <value>A calendar system for the Um Al Qura calendar.</value>
         public static CalendarSystem UmAlQura => MiscellaneousCalendars.UmAlQura;
 
-
         /// <summary>
         /// Returns the Korean lunisolar calendar.
         /// </summary>
@@ -873,5 +874,83 @@ namespace NodaTime
             // Static constructor to enforce laziness.
             static EastAsianLunisolarCalendars() { }
         }
+
+        #region some special methods for East Asian lunisolar calendars
+        /// <summary>
+        /// Gets the name of a month in a year.
+        /// Currently this method is only for East Asian lunisolar calendars. Otherwise it just 
+        /// returns the <c>Month</c> itself in string.
+        /// <remarks>
+        /// <para>
+        /// In East Asian lunisolar calendars, a leap month is named after the preceding "normal" month,
+        /// with a prefix indicating it is a leap month.
+        /// For example, if a year has a leap month in Month 6, the Month 5 of that year is followed
+        /// by Month 6, Month Leap-6, and then Month 7.
+        /// For the leap month to the last month in the year ("Month 12"), month number is 1 greater
+        /// than month name. In the example above, Month 7 has the month number of 8.
+        /// </para>
+        /// </remarks>
+        /// </summary>
+        /// <param name="yearMonth">The <see cref="YearMonth"/> to get its name.</param>
+        /// <returns>The month name, with or without the leap month prefix.</returns>
+        public string GetMonthName(YearMonth yearMonth)
+            => GetMonthName(yearMonth.Year, yearMonth.Month);
+
+        /// <summary>
+        /// Gets the name of a month in a year.
+        /// Currently this method is only for East Asian lunisolar calendars. Otherwise it just 
+        /// returns the <c>Month</c> itself in string.
+        /// <remarks>
+        /// <para>
+        /// In East Asian lunisolar calendars, a leap month is named after the preceding "normal" month,
+        /// with a prefix indicating it is a leap month.
+        /// For example, if a year has a leap month in Month 6, the Month 5 of that year is followed
+        /// by Month 6, Month Leap-6, and then Month 7.
+        /// For the leap month to the last month in the year ("Month 12"), month number is 1 greater
+        /// than month name. In the example above, Month 7 has the month number of 8.
+        /// </para>
+        /// </remarks>
+        /// </summary>
+        /// <param name="date">The <see cref="LocalDate"/> to get its month name.</param>
+        /// <returns>The month name, with or without the leap month prefix.</returns>
+        public string GetMonthName(LocalDate date)
+            => GetMonthName(date.Year, date.Month);
+
+        /// <summary>
+        /// Gets the name of a month in a year.
+        /// Currently this method is only for East Asian lunisolar calendars. Otherwise it just 
+        /// returns the <c>Month</c> itself in string.
+        /// <remarks>
+        /// <para>
+        /// In East Asian lunisolar calendars, a leap month is named after the preceding "normal" month,
+        /// with a prefix indicating it is a leap month.
+        /// For example, if a year has a leap month in Month 6, the Month 5 of that year is followed
+        /// by Month 6, Month Leap-6, and then Month 7.
+        /// For the leap month to the last month in the year ("Month 12"), month number is 1 greater
+        /// than month name. In the example above, Month 7 has the month number of 8.
+        /// </para>
+        /// </remarks>
+        /// </summary>        
+        /// <returns>The month name, with or without the leap month prefix.</returns>
+        public string GetMonthName(int year, int month)
+        {
+            // if the CalendarSystem is not an EALC, just return the month number itself in string
+            if (YearMonthDayCalculator is not EastAsianLunisolarYearMonthDayCalculator calc)
+                return month.ToString();
+
+            int leap = calc.GetLeapMonth(year);
+            if (leap == 0)
+                return month.ToString();
+            else
+            {
+                if (month <= leap)
+                    return month.ToString();
+                else if (month == leap + 1)
+                    return calc.LeapMonthPrefix + leap.ToString();
+                else
+                    return (month - 1).ToString();
+            }
+        }
+        #endregion
     }
 }
