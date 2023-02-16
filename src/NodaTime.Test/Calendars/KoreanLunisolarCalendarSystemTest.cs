@@ -87,7 +87,9 @@ namespace NodaTime.Test.Calendars
         {
             var calendar = CalendarSystem.KoreanLunisolar;
             Assert.AreEqual(calendar.GetMonthName(new YearMonth(2023, 2)), "2");
-            Assert.AreEqual(calendar.GetMonthName(new YearMonth(2023, 3)), "윤2");
+            Assert.AreEqual(calendar.GetMonthName(2023, 3), "윤2");
+            Assert.AreEqual(calendar.GetMonthName(new LocalDate(2023, 4, 1, calendar)), "3");
+
         }
     }
 }

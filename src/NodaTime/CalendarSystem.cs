@@ -90,7 +90,7 @@ namespace NodaTime
         private const string KoreanLunisolarId = KoreanLunisolarName;
 
         // While we could implement some of these as auto-props, it probably adds more confusion than convenience.
-        private static readonly CalendarSystem[] CalendarByOrdinal = new CalendarSystem[(int) CalendarOrdinal.Size];
+        private static readonly CalendarSystem[] CalendarByOrdinal = new CalendarSystem[(int)CalendarOrdinal.Size];
 
         static CalendarSystem()
         {
@@ -131,7 +131,7 @@ namespace NodaTime
             {
                 return Iso;
             }
-            CalendarSystem calendar = CalendarByOrdinal[(int) ordinal];
+            CalendarSystem calendar = CalendarByOrdinal[(int)ordinal];
             if (calendar != null)
             {
                 return calendar;
@@ -210,8 +210,8 @@ namespace NodaTime
         /// <returns>A Hebrew calendar system for the given month numbering.</returns>
         public static CalendarSystem GetHebrewCalendar(HebrewMonthNumbering monthNumbering)
         {
-            Preconditions.CheckArgumentRange(nameof(monthNumbering), (int) monthNumbering, 1, 2);
-            return HebrewCalendars.ByMonthNumbering[((int) monthNumbering) - 1];
+            Preconditions.CheckArgumentRange(nameof(monthNumbering), (int)monthNumbering, 1, 2);
+            return HebrewCalendars.ByMonthNumbering[((int)monthNumbering) - 1];
         }
 
         /// <summary>
@@ -293,9 +293,9 @@ namespace NodaTime
         /// calls as the object is immutable and thread-safe.</returns>
         public static CalendarSystem GetIslamicCalendar(IslamicLeapYearPattern leapYearPattern, IslamicEpoch epoch)
         {
-            Preconditions.CheckArgumentRange(nameof(leapYearPattern), (int) leapYearPattern, 1, 4);
-            Preconditions.CheckArgumentRange(nameof(epoch), (int) epoch, 1, 2);
-            return IslamicCalendars.ByLeapYearPatterAndEpoch[(int) leapYearPattern - 1, (int) epoch - 1];
+            Preconditions.CheckArgumentRange(nameof(leapYearPattern), (int)leapYearPattern, 1, 4);
+            Preconditions.CheckArgumentRange(nameof(epoch), (int)epoch, 1, 2);
+            return IslamicCalendars.ByLeapYearPatterAndEpoch[(int)leapYearPattern - 1, (int)epoch - 1];
         }
 
         #endregion
@@ -320,7 +320,7 @@ namespace NodaTime
             this.MaxDays = yearMonthDayCalculator.GetStartOfYearInDays(MaxYear + 1) - 1;
             // We trust the construction code not to mutate the array...
             this.eraCalculator = eraCalculator;
-            CalendarByOrdinal[(int) ordinal] = this;
+            CalendarByOrdinal[(int)ordinal] = this;
         }
 
         /// <summary>
@@ -493,7 +493,7 @@ namespace NodaTime
             int daysSinceEpoch = YearMonthDayCalculator.GetDaysSinceEpoch(yearMonthDay);
             int numericDayOfWeek = unchecked(daysSinceEpoch >= -3 ? 1 + ((daysSinceEpoch + 3) % 7)
                                            : 7 + ((daysSinceEpoch + 4) % 7));
-            return (IsoDayOfWeek) numericDayOfWeek;
+            return (IsoDayOfWeek)numericDayOfWeek;
         }
 
         /// <summary>
@@ -787,7 +787,7 @@ namespace NodaTime
                 new CalendarSystem(CalendarOrdinal.PersianAstronomical, PersianAstronomicalId, PersianName, new PersianYearMonthDayCalculator.Astronomical(), Era.AnnoPersico);
 
             // Static constructor to enforce laziness.
-            static PersianCalendars() {}
+            static PersianCalendars() { }
         }
 
         /// <summary>
@@ -807,9 +807,9 @@ namespace NodaTime
                 {
                     for (int j = 1; j <= 2; j++)
                     {
-                        var leapYearPattern = (IslamicLeapYearPattern) i;
-                        var epoch = (IslamicEpoch) j;
-                        var calculator = new IslamicYearMonthDayCalculator((IslamicLeapYearPattern) i, (IslamicEpoch) j);
+                        var leapYearPattern = (IslamicLeapYearPattern)i;
+                        var epoch = (IslamicEpoch)j;
+                        var calculator = new IslamicYearMonthDayCalculator((IslamicLeapYearPattern)i, (IslamicEpoch)j);
                         CalendarOrdinal ordinal = CalendarOrdinal.IslamicAstronomicalBase15 + (i - 1) + (j - 1) * 4;
                         ByLeapYearPatterAndEpoch[i - 1, j - 1] = new CalendarSystem(ordinal, GetIslamicId(leapYearPattern, epoch), IslamicName, calculator, Era.AnnoHegirae);
                     }
@@ -949,6 +949,72 @@ namespace NodaTime
                     return calc.LeapMonthPrefix + leap.ToString();
                 else
                     return (month - 1).ToString();
+            }
+        }
+
+        /// <summary>
+        /// Gets the month number from the name of a month in a year.
+        /// Currently this method is only for East Asian lunisolar calendars. Otherwise it just 
+        /// returns the <c>Month</c> itself in string.
+        /// <remarks>
+        /// <para>
+        /// In East Asian lunisolar calendars, a leap month is named after the preceding "normal" month,
+        /// with a prefix indicating it is a leap month.
+        /// For example, if a year has a leap month in Month 6, the Month 5 of that year is followed
+        /// by Month 6, Month Leap-6, and then Month 7.
+        /// For the leap month to the last month in the year ("Month 12"), month number is 1 greater
+        /// than month name. In the example above, Month 7 has the month number of 8.
+        /// </para>
+        /// </remarks>
+        /// </summary>        
+        /// <returns>The month number.</returns>
+        public int GetMonthNumberFromMonthName(int year, int monthName)
+            => GetMonthNumberFromMonthName(year, monthName.ToString());
+
+        /// <summary>
+        /// Gets the month number from the name of a month in a year.
+        /// Currently this method is only for East Asian lunisolar calendars. Otherwise it just 
+        /// returns the <c>Month</c> itself in string.
+        /// <remarks>
+        /// <para>
+        /// In East Asian lunisolar calendars, a leap month is named after the preceding "normal" month,
+        /// with a prefix indicating it is a leap month.
+        /// For example, if a year has a leap month in Month 6, the Month 5 of that year is followed
+        /// by Month 6, Month Leap-6, and then Month 7.
+        /// For the leap month to the last month in the year ("Month 12"), month number is 1 greater
+        /// than month name. In the example above, Month 7 has the month number of 8.
+        /// </para>
+        /// </remarks>
+        /// </summary>        
+        /// <returns>The month number.</returns>
+        public int GetMonthNumberFromMonthName(int year, string monthName)
+        {
+            // if the CalendarSystem is not an EALC, just return the month number itself in string
+            if (YearMonthDayCalculator is not EastAsianLunisolarYearMonthDayCalculator calc)
+                return int.Parse(monthName);
+
+            int leap = calc.GetLeapMonth(year);
+            if (leap == 0)
+                return int.Parse(monthName);
+            else
+            {
+                string monthNamePartial = monthName.Replace(calc.LeapMonthPrefix, "");
+                int value = int.Parse(monthNamePartial);
+
+                if (monthName.StartsWith(calc.LeapMonthPrefix))
+                {
+                    if (leap == value)
+                        return value + 1;
+                    else
+                        throw new ArgumentException("invalid leap month for the given year");
+                }
+                else
+                {
+                    if (value <= leap)
+                        return value;
+                    else
+                        return value + 1;
+                }
             }
         }
         #endregion
